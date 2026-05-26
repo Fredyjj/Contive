@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convite especial 💌</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #fff0f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(212,83,126,0.10);
+    position: relative;
+  }
+  .page { display: none; }
+  .page.active { display: block; }
+  .emoji-big { font-size: 56px; margin-bottom: 1rem; }
+  h1 { font-size: 26px; font-weight: 700; color: #222; margin-bottom: 0.5rem; }
+  .sub { font-size: 15px; color: #888; margin-bottom: 1.5rem; line-height: 1.6; }
+
+  .cat-gif {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.4rem;
+    display: block;
+    border: 3px solid #F4C0D1;
+  }
+  .final-gif {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.2rem;
+    display: block;
+    border: 3px solid #F4C0D1;
+  }
+
+  /* Sim button - static, centered */
+  .btn-yes {
+    background: #D4537E;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 13px 36px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+  }
+  .btn-yes:hover { background: #b83f68; }
+
+  /* Não button - floats freely over the whole page */
+  .btn-no {
+    background: #f5f5f5;
+    color: #aaa;
+    border: 1.5px solid #ddd;
+    border-radius: 50px;
+    padding: 13px 28px;
+    font-size: 15px;
+    cursor: pointer;
+    position: fixed;
+    white-space: nowrap;
+    z-index: 999;
+    transition: left 0.12s ease, top 0.12s ease;
+    user-select: none;
+  }
+
+  .sim-wrapper {
+    margin: 0.5rem auto 0;
+    display: flex;
+    justify-content: center;
+  }
+  .no-msg {
+    font-size: 13px;
+    color: #D4537E;
+    margin-top: 0.8rem;
+    min-height: 18px;
+    font-style: italic;
+  }
+
+  .section-title { font-size: 18px; font-weight: 700; color: #222; margin-bottom: 1.2rem; }
+  .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .option-btn {
+    background: #fff0f5;
+    border: 2px solid #F4C0D1;
+    border-radius: 16px;
+    padding: 18px 8px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #993556;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .option-btn .sticker { font-size: 36px; }
+  .option-btn:hover, .option-btn.selected { background: #F4C0D1; border-color: #D4537E; }
+  .btn-next {
+    background: #D4537E;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 13px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+  .btn-next:disabled { background: #edc2cf; cursor: not-allowed; }
+  .btn-next:not(:disabled):hover { background: #b83f68; }
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .time-btn {
+    background: #fff0f5;
+    border: 2px solid #F4C0D1;
+    border-radius: 16px;
+    padding: 20px 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #993556;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .time-btn:hover, .time-btn.selected { background: #F4C0D1; border-color: #D4537E; }
+  .final-box { padding: 1rem 0; }
+  .summary {
+    background: #fff0f5;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0 1.5rem;
+    text-align: left;
+    font-size: 14px;
+    color: #555;
+    line-height: 2;
+  }
+  .summary span { font-weight: 700; color: #D4537E; }
+  .progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 1.8rem; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #F4C0D1; }
+  .dot.active { background: #D4537E; }
+</style>
+</head>
+<body>
+
+<!-- Botão Não flutuante -->
+<button class="btn-no" id="btnNo" onmouseenter="escapar()" ontouchstart="escapar(event)">Não</button>
+
+<div class="card">
+
+  <!-- Página 1: Convite -->
+  <div class="page active" id="page1">
+    <img class="cat-gif"
+      src="https://media.tenor.com/images/b7e3da342e31e72c55ceef60e28ab9a7/tenor.gif"
+      alt="gatinho fofo"
+      onerror="this.src='https://media.tenor.com/9VDNM5B1WUAAAAAC/cat-cute.gif'">
+    <h1>Meldy, quer sair comigo?</h1>
+    <p class="sub">Prometo que vai ser uma tarde incrível 🥺<br>Só precisas de dizer sim!</p>
+    <div class="sim-wrapper">
+      <button class="btn-yes" onclick="aceitar()">Sim! 🎉</button>
+    </div>
+    <p class="no-msg" id="noMsg"></p>
+  </div>
+
+  <!-- Página 2: Data -->
+  <div class="page" id="page2">
+    <div class="progress">
+      <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+    <div class="emoji-big">📅</div>
+    <h1>Quando?</h1>
+    <p class="sub">Escolhe o melhor dia para nós</p>
+    <div style="margin-bottom:1.2rem;">
+      <input type="date" id="datePicker" style="padding:12px 16px; border-radius:12px; border:2px solid #F4C0D1; font-size:15px; color:#993556; background:#fff0f5; width:100%;">
+    </div>
+    <p class="section-title" style="margin-top:1.2rem;">E o horário?</p>
+    <div class="time-grid">
+      <button class="time-btn" onclick="selectTime(this, 'Depois das 12h 🌞')">🌞<br>Depois das 12h</button>
+      <button class="time-btn" onclick="selectTime(this, 'Depois das 17h 🌅')">🌅<br>Depois das 17h</button>
+    </div>
+    <button class="btn-next" id="btnDate" disabled onclick="nextPage(3)">Próximo →</button>
+  </div>
+
+  <!-- Página 3: Comida -->
+  <div class="page" id="page3">
+    <div class="progress">
+      <div class="dot"></div><div class="dot active"></div><div class="dot"></div>
+    </div>
+    <div class="emoji-big">🍽️</div>
+    <h1>O que vais querer comer?</h1>
+    <p class="sub">Escolhe à vontade (podes escolher mais de um!)</p>
+    <div class="option-grid">
+      <button class="option-btn" onclick="toggleFood(this, 'Pizza 🍕')"><span class="sticker">🍕</span>Pizza</button>
+      <button class="option-btn" onclick="toggleFood(this, 'Frango 🍗')"><span class="sticker">🍗</span>Frango</button>
+      <button class="option-btn" onclick="toggleFood(this, 'Hambúrguer 🍔')"><span class="sticker">🍔</span>Hambúrguer</button>
+      <button class="option-btn" onclick="toggleFood(this, 'Sushi 🍣')"><span class="sticker">🍣</span>Sushi</button>
+      <button class="option-btn" onclick="toggleFood(this, 'Massa 🍝')"><span class="sticker">🍝</span>Massa</button>
+      <button class="option-btn" onclick="toggleFood(this, 'Sobremesa 🍰')"><span class="sticker">🍰</span>Sobremesa</button>
+    </div>
+    <button class="btn-next" id="btnFood" disabled onclick="nextPage(4)">Confirmar →</button>
+  </div>
+
+  <!-- Página 4: Confirmação final -->
+  <div class="page final-box" id="page4">
+    <div class="progress">
+      <div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+    </div>
+    <img class="final-gif"
+      src="https://media.tenor.com/images/730db4f3c5b17cd5cfbd5a0b2a3e9f46/tenor.gif"
+      alt="gatinho feliz"
+      onerror="this.src='https://media.tenor.com/oG1oEt5pz3MAAAAC/happy-cat-cat.gif'">
+    <h1>Está marcado! 🎉</h1>
+    <p class="sub">Fico tão feliz que não disseste não! 💕<br>Mal posso esperar por esse dia contigo!</p>
+    <div class="summary" id="summary"></div>
+    <p style="font-size:13px; color:#aaa;">Guarda este ecrã como confirmação 📸</p>
+  </div>
+
+</div>
+
+<script>
+  let selectedTime = '';
+  let selectedFoods = [];
+  let attempts = 0;
+  let orbitAngle = 0;
+  let orbitActive = true;
+
+  const noMsgs = [
+    'Tenta lá outra vez... 😏',
+    'Esse botão não para quieto! 😂',
+    'Esquece o Não! 😤',
+    'Estás a brincar comigo?? 😭',
+    'Vai desistir do Não... 🙏',
+    'Só o Sim funciona aqui 😇',
+    'Impossível clicar no Não 😜',
+    'Foge sempre! 🏃',
+  ];
+
+  const btn = document.getElementById('btnNo');
+
+  function getOrbitPos() {
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+    const rx = Math.min(window.innerWidth * 0.38, 160);
+    const ry = Math.min(window.innerHeight * 0.30, 120);
+    const x = cx + rx * Math.cos(orbitAngle) - btn.offsetWidth / 2;
+    const y = cy + ry * Math.sin(orbitAngle) - btn.offsetHeight / 2;
+    return { x: Math.max(8, Math.min(x, window.innerWidth - btn.offsetWidth - 8)),
+             y: Math.max(8, Math.min(y, window.innerHeight - btn.offsetHeight - 8)) };
+  }
+
+  function orbit() {
+    if (!orbitActive) return;
+    orbitAngle += 0.018;
+    const pos = getOrbitPos();
+    btn.style.left = pos.x + 'px';
+    btn.style.top = pos.y + 'px';
+    requestAnimationFrame(orbit);
+  }
+
+  window.addEventListener('load', () => {
+    const pos = getOrbitPos();
+    btn.style.left = pos.x + 'px';
+    btn.style.top = pos.y + 'px';
+    orbit();
+  });
+
+  function escapar(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    orbitAngle += Math.PI * (0.4 + Math.random() * 0.6);
+    const pos = getOrbitPos();
+    btn.style.transition = 'left 0.08s, top 0.08s';
+    btn.style.left = pos.x + 'px';
+    btn.style.top = pos.y + 'px';
+    if (attempts < noMsgs.length * 3) {
+      document.getElementById('noMsg').textContent = noMsgs[attempts % noMsgs.length];
+    }
+    attempts++;
+    setTimeout(() => { btn.style.transition = ''; }, 100);
+  }
+
+  function aceitar() {
+    orbitActive = false;
+    btn.style.display = 'none';
+    nextPage(2);
+  }
+
+  function nextPage(n) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page' + n).classList.add('active');
+    if (n === 4) buildSummary();
+  }
+
+  document.getElementById('datePicker').addEventListener('change', checkDate);
+
+  function selectTime(b, val) {
+    document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('selected'));
+    b.classList.add('selected');
+    selectedTime = val;
+    checkDate();
+  }
+
+  function checkDate() {
+    const d = document.getElementById('datePicker').value;
+    document.getElementById('btnDate').disabled = !(d && selectedTime);
+  }
+
+  function toggleFood(b, food) {
+    b.classList.toggle('selected');
+    if (b.classList.contains('selected')) {
+      selectedFoods.push(food);
+    } else {
+      selectedFoods = selectedFoods.filter(f => f !== food);
+    }
+    document.getElementById('btnFood').disabled = selectedFoods.length === 0;
+  }
+
+  function buildSummary() {
+    const d = document.getElementById('datePicker').value;
+    const [y, m, day] = d.split('-');
+    const dateStr = day + '/' + m + '/' + y;
+    document.getElementById('summary').innerHTML =
+      '📅 Data: <span>' + dateStr + '</span><br>' +
+      '🕐 Horário: <span>' + selectedTime + '</span><br>' +
+      '🍽️ Comida: <span>' + selectedFoods.join(', ') + '</span>';
+  }
+</script>
+</body>
+</html>
